@@ -85,9 +85,6 @@ class AuthRepository
         $verify = new $this->verifyUser;
         $verify->user_id = $userId;
         $verify->token = sha1(time());
-        $verify->otp = rand(1111,9999);
-        $verify->otp_expired_at = $twoDays;
-        $verify->token_expired_at = $oneWeek;
         $verify->save();
         return $verify;
     }

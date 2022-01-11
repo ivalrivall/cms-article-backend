@@ -45,71 +45,6 @@ class AuthController extends BaseController
         $this->roleService = $roleService;
     }
 
-    public function login(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'userId' => 'bail|required',
-            'password' => 'bail|required',
-            'fcm' => 'nullable'
-        ]);
-
-        if ($validator->fails()) {
-            if ($validator->errors()->first('userId')) {
-                return $this->sendError($validator->errors()->first('userId'), 4001);
-            }
-            if ($validator->errors()->first('password')) {
-                return $this->sendError($validator->errors()->first('password'), 4002);
-            }
-        }
-
-        $useEmail = filter_var(strtolower($request->userId), FILTER_VALIDATE_EMAIL);
-
-        if (!$useEmail) {
-            $user = User::where('username', strtolower($request->userId))->first();
-            if (!$user) {
-                return $this->sendError('Username tersebut tidak cocok dengan data kami', 4003);
-            }
-        } else {
-            $user = User::where('email', strtolower($request->userId))->first();
-            if (!$user) {
-                return $this->sendError('Email tersebut tidak cocok dengan data kami', 4004);
-            }
-        }
-
-        try {
-            $this->roleService->validateRoleLogin($user, 'customer', false);
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
-
-        $request->merge(['email' => $user->email]);
-
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
-            DB::beginTransaction();
-            // UPDATE FCM
-            if ($request->fcm !== null) {
-                try {
-                    $this->userService->updateFcmService(['fcm' => $request->fcm, 'userId' => $user->id]);
-                } catch (Exception $e) {
-                    DB::rollback();
-                    return $this->sendError($e->getMessage());
-                }
-            }
-
-            try {
-                $response = $this->authService->getAccessToken(strtolower($request->email), $request->password);
-            } catch (Exception $e) {
-                DB::rollback();
-                return $this->sendError($e->getMessage());
-            }
-            DB::commit();
-
-            return $this->sendResponse('Berhasil login', $response);
-        } else {
-            return $this->sendError('Password tersebut tidak cocok dengan data kami', 4005);
-        }
-    }
-
     public function loginWeb(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -166,62 +101,6 @@ class AuthController extends BaseController
         }
     }
 
-    public function loginDriver(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'userId' => 'bail|required',
-            'password' => 'bail|required',
-        ]);
-
-        if ($validator->fails()) {
-            if ($validator->errors()->first('userId')) {
-                return $this->sendError($validator->errors()->first('userId'), 4001);
-            }
-            if ($validator->errors()->first('password')) {
-                return $this->sendError($validator->errors()->first('password'), 4002);
-            }
-        }
-
-        $useEmail = filter_var(strtolower($request->userId), FILTER_VALIDATE_EMAIL);
-
-        if (!$useEmail) {
-            $user = User::where('username', strtolower($request->userId))->first();
-            if (!$user) {
-                return $this->sendError('Username tersebut tidak cocok dengan data kami', 4003);
-            }
-        } else {
-            $user = User::where('email', strtolower($request->userId))->first();
-            if (!$user) {
-                return $this->sendError('Email tersebut tidak cocok dengan data kami', 4004);
-            }
-        }
-
-        try {
-            $this->roleService->validateRoleLogin($user, 'driver', false);
-        } catch (Exception $e) {
-            return $this->sendError($e->getMessage());
-        }
-
-        $request->merge(['email' => $user->email]);
-
-        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
-            DB::beginTransaction();
-            // $user = Auth::user();
-
-            try {
-                $response = $this->authService->getAccessToken(strtolower($request->email), $request->password);
-            } catch (Exception $e) {
-                DB::rollback();
-                return $this->sendError($e->getMessage());
-            }
-            DB::commit();
-
-            return $this->sendResponse('Berhasil login', $response);
-        } else {
-            return $this->sendError('Password tersebut tidak cocok dengan data kami', 4005);
-        }
-    }
-
     public function register(Request $request)
     {
         DB::beginTransaction();
@@ -245,28 +124,6 @@ class AuthController extends BaseController
         // send email verification
         try {
             $this->mailService->sendEmailVerification($user, $verifyUser);
-        } catch (Exception $e) {
-            DB::rollback();
-            return $this->sendError($e->getMessage());
-        }
-
-        // send otp
-        try {
-            $str = preg_replace("/[^0-9]/", "", $user->phone);
-            // if (strstr($str, '+')) {
-            //     $phone = ltrim($str, '+');
-            // }
-            if (strstr($str, '0')) {
-                $phone = ltrim($str, '0');
-            }
-            if (!strstr($phone, '62')) {
-                $phoneTarget = "62$phone";
-            }
-            $payload = [
-                'otp' => $verifyUser->otp,
-                'phone' => $phoneTarget
-            ];
-            $this->authService->sendOTP($payload);
         } catch (Exception $e) {
             DB::rollback();
             return $this->sendError($e->getMessage());
