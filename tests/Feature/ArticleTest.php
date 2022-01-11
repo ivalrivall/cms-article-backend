@@ -16,14 +16,17 @@ class ArticleTest extends TestCase
      *
      * @return void
      */
-    public function testInsertArticle()
+    public function testArticle()
     {
+        // login
+        $response = $this->postJson('/api/login-web', ['userId' => 'admin', 'password' => 'admin1234', 'email'=>'admin@gmail.com']);
+        $response->assertStatus(200);
+
+        // insert article
         $faker = Faker::create();
         $slug = $faker->slug;
         $titleArticle = $faker->name;
         $file = UploadedFile::fake()->image('article-banner.jpg');
-        $response = $this->postJson('/api/login-web', ['userId' => 'admin', 'password' => 'admin1234', 'email'=>'admin@gmail.com']);
-        $response->assertStatus(200);
         $token = $response->decodeResponseJson();
         $token = $token['data']['token'];
         $postArticle = $this->withHeaders([
@@ -34,6 +37,23 @@ class ArticleTest extends TestCase
             'url'=> $slug,
             'description' => null
         ]);
+        $postArticleJson = $postArticle->decodeResponseJson();
         $postArticle->assertStatus(200);
+
+        // update article
+        $faker = Faker::create();
+        $slug = $faker->slug;
+        $titleArticle = $faker->name;
+        $file = UploadedFile::fake()->image('article-banner.jpg');
+        $updateArticle = $this->withHeaders([
+            'Authorization' => "Bearer $token"
+        ])->postJson('/api/app-content/article/update', [
+            'articleId' => $postArticleJson['data']['id'],
+            'title' => $titleArticle,
+            'image' => $file,
+            'url'=> $slug,
+            'description' => null
+        ]);
+        $updateArticle->assertStatus(200);
     }
 }
