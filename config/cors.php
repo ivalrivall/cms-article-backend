@@ -33,7 +33,7 @@ return [
         'X-XSRF-TOKEN',
         'X-CSRF-TOKEN',
         'X-Requested-With',
-        'X-PAPANDAYAN-TOKEN',
+        'X-TOKEN',
     ],
 
     'exposed_headers' => [],
