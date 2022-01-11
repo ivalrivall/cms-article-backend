@@ -1,0 +1,400 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Http\Controllers\BaseController;
+use App\Models\User;
+use App\Models\Role;
+use App\Services\AuthService;
+use App\Services\UserService;
+use App\Services\MailService;
+use App\Services\RoleService;
+use App\Utilities\ProxyRequest;
+
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+use Exception;
+
+class AuthController extends BaseController
+{
+    protected $proxy;
+    protected $authService;
+    protected $userService;
+    protected $mailService;
+    protected $roleService;
+
+    public function __construct(
+        ProxyRequest $proxy,
+        AuthService $authService,
+        UserService $userService,
+        MailService $mailService,
+        RoleService $roleService
+    )
+    {
+        $this->proxy = $proxy;
+        $this->authService = $authService;
+        $this->userService = $userService;
+        $this->mailService = $mailService;
+        $this->roleService = $roleService;
+    }
+
+    public function login(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'userId' => 'bail|required',
+            'password' => 'bail|required',
+            'fcm' => 'nullable'
+        ]);
+
+        if ($validator->fails()) {
+            if ($validator->errors()->first('userId')) {
+                return $this->sendError($validator->errors()->first('userId'), 4001);
+            }
+            if ($validator->errors()->first('password')) {
+                return $this->sendError($validator->errors()->first('password'), 4002);
+            }
+        }
+
+        $useEmail = filter_var(strtolower($request->userId), FILTER_VALIDATE_EMAIL);
+
+        if (!$useEmail) {
+            $user = User::where('username', strtolower($request->userId))->first();
+            if (!$user) {
+                return $this->sendError('Username tersebut tidak cocok dengan data kami', 4003);
+            }
+        } else {
+            $user = User::where('email', strtolower($request->userId))->first();
+            if (!$user) {
+                return $this->sendError('Email tersebut tidak cocok dengan data kami', 4004);
+            }
+        }
+
+        try {
+            $this->roleService->validateRoleLogin($user, 'customer', false);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+
+        $request->merge(['email' => $user->email]);
+
+        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+            DB::beginTransaction();
+            // UPDATE FCM
+            if ($request->fcm !== null) {
+                try {
+                    $this->userService->updateFcmService(['fcm' => $request->fcm, 'userId' => $user->id]);
+                } catch (Exception $e) {
+                    DB::rollback();
+                    return $this->sendError($e->getMessage());
+                }
+            }
+
+            try {
+                $response = $this->authService->getAccessToken(strtolower($request->email), $request->password);
+            } catch (Exception $e) {
+                DB::rollback();
+                return $this->sendError($e->getMessage());
+            }
+            DB::commit();
+
+            return $this->sendResponse('Berhasil login', $response);
+        } else {
+            return $this->sendError('Password tersebut tidak cocok dengan data kami', 4005);
+        }
+    }
+
+    public function loginWeb(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'userId' => 'bail|required',
+            'password' => 'bail|required',
+        ]);
+
+        if ($validator->fails()) {
+            if ($validator->errors()->first('userId')) {
+                return $this->sendError($validator->errors()->first('userId'), 4001);
+            }
+            if ($validator->errors()->first('password')) {
+                return $this->sendError($validator->errors()->first('password'), 4002);
+            }
+        }
+
+        $useEmail = filter_var(strtolower($request->userId), FILTER_VALIDATE_EMAIL);
+
+        if (!$useEmail) {
+            $user = User::where('username', strtolower($request->userId))->first();
+            if (!$user) {
+                return $this->sendError('Username tersebut tidak cocok dengan data kami', 4003);
+            }
+        } else {
+            $user = User::where('email', strtolower($request->userId))->first();
+            if (!$user) {
+                return $this->sendError('Email tersebut tidak cocok dengan data kami', 4004);
+            }
+        }
+
+        try {
+            $this->roleService->validateRoleLogin($user, 'admin', false);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+
+        $request->merge(['email' => $user->email]);
+
+        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+            DB::beginTransaction();
+            // $user = Auth::user();
+
+            try {
+                $response = $this->authService->getAccessToken(strtolower($request->email), $request->password);
+            } catch (Exception $e) {
+                DB::rollback();
+                return $this->sendError($e->getMessage());
+            }
+            DB::commit();
+
+            return $this->sendResponse('Berhasil login', $response);
+        } else {
+            return $this->sendError('Password tersebut tidak cocok dengan data kami', 4005);
+        }
+    }
+
+    public function loginDriver(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'userId' => 'bail|required',
+            'password' => 'bail|required',
+        ]);
+
+        if ($validator->fails()) {
+            if ($validator->errors()->first('userId')) {
+                return $this->sendError($validator->errors()->first('userId'), 4001);
+            }
+            if ($validator->errors()->first('password')) {
+                return $this->sendError($validator->errors()->first('password'), 4002);
+            }
+        }
+
+        $useEmail = filter_var(strtolower($request->userId), FILTER_VALIDATE_EMAIL);
+
+        if (!$useEmail) {
+            $user = User::where('username', strtolower($request->userId))->first();
+            if (!$user) {
+                return $this->sendError('Username tersebut tidak cocok dengan data kami', 4003);
+            }
+        } else {
+            $user = User::where('email', strtolower($request->userId))->first();
+            if (!$user) {
+                return $this->sendError('Email tersebut tidak cocok dengan data kami', 4004);
+            }
+        }
+
+        try {
+            $this->roleService->validateRoleLogin($user, 'driver', false);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+
+        $request->merge(['email' => $user->email]);
+
+        if(Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+            DB::beginTransaction();
+            // $user = Auth::user();
+
+            try {
+                $response = $this->authService->getAccessToken(strtolower($request->email), $request->password);
+            } catch (Exception $e) {
+                DB::rollback();
+                return $this->sendError($e->getMessage());
+            }
+            DB::commit();
+
+            return $this->sendResponse('Berhasil login', $response);
+        } else {
+            return $this->sendError('Password tersebut tidak cocok dengan data kami', 4005);
+        }
+    }
+
+    public function register(Request $request)
+    {
+        DB::beginTransaction();
+
+        // save user
+        try {
+            $user = $this->userService->save($request->all());
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+
+        // create verify user
+        try {
+            $verifyUser = $this->authService->createVerifyUser($user->id);
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+
+        // send email verification
+        try {
+            $this->mailService->sendEmailVerification($user, $verifyUser);
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+
+        // send otp
+        try {
+            $str = preg_replace("/[^0-9]/", "", $user->phone);
+            // if (strstr($str, '+')) {
+            //     $phone = ltrim($str, '+');
+            // }
+            if (strstr($str, '0')) {
+                $phone = ltrim($str, '0');
+            }
+            if (!strstr($phone, '62')) {
+                $phoneTarget = "62$phone";
+            }
+            $payload = [
+                'otp' => $verifyUser->otp,
+                'phone' => $phoneTarget
+            ];
+            $this->authService->sendOTP($payload);
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+
+        // get access token
+        try {
+            $response = $this->authService->getAccessToken(strtolower($user->email), $request->password);
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+
+        DB::commit();
+        return $this->sendResponse('Pengguna berhasil register', $response);
+    }
+
+    public function refreshToken(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $response = $this->authService->refreshToken($request->refreshToken);
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+        DB::commit();
+        return $this->sendResponse('Token telah di perbarui', $response);
+    }
+
+    public function logout(Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $request->user()->token()->revoke();
+            $this->authService->revoke($request->user()->token()->id);
+            $token = request()->user()->token();
+            $token->delete();
+        } catch (Exception $e) {
+            DB::rollback();
+            return $this->sendError($e->getMessage());
+        }
+        DB::commit();
+
+        // remove the httponly cookie
+        // cookie()->queue(cookie()->forget('refresh_token'));
+
+        return $this->sendResponse('Successfully logged out');
+    }
+
+    public function checkLogin(Request $request)
+    {
+        if (Auth::guard('api')->check()) {
+            // Here you have access to $request->user() method that
+            // contains the model of the currently authenticated user.
+            //
+            // Note that this method should only work if you call it
+            // after an Auth::check(), because the user is set in the
+            // request object by the auth component after a successful
+            // authentication check/retrival
+            $user = $request->user();
+            $user = User::with(['role','branch'])->where('id', $user->id)->first();
+            return response()->json($user);
+        }
+
+        // alternative method
+        if (($user = Auth::user()) !== null) {
+            // Here you have your authenticated user model
+            $user = User::with(['role','branch'])->where('id', $user->id)->first();
+            return response()->json($user);
+        }
+
+        return $this->sendError('Unauthenticated user', null);
+
+        // return response('Unauthenticated user');
+    }
+
+    public function resendOTP(Request $request)
+    {
+        // CHECK CURRENT NUMBER IS VERIFIED OR NOT
+        try {
+            $this->authService->checkVerifiedPhoneUserService($request->phone);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+
+        // UPDATE OTP
+        try {
+            $otp = $this->authService->updateOTPUserByPhoneNumberService($request->phone);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+
+        // send otp
+        try {
+            $str = preg_replace("/[^0-9]/", "", $request->phone);
+            // if (strstr($str, '+')) {
+            //     $phone = ltrim($str, '+');
+            // }
+            if (strstr($str, '0')) {
+                $phone = ltrim($str, '0');
+                $phoneTarget = "62$phone";
+            }
+            $payload = [
+                'otp' => $otp,
+                'phone' => $phoneTarget
+            ];
+            $this->authService->sendOTP($payload);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+        return $this->sendResponse('Berhasil mengirim ulang OTP');
+    }
+
+    /**
+     * verify phone by OTP
+     */
+    public function verifyOTP(Request $request)
+    {
+        $data = $request->only([
+            'otp',
+            'userId'
+        ]);
+        try {
+            $this->authService->verifyOTP($data);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+        return $this->sendResponse('Berhasil verifikasi');
+    }
+}

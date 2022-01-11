@@ -1,0 +1,38 @@
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\FeatureSeeder;
+use Database\Seeders\UserSeeder;
+use Database\Seeders\FeatureRoleSeeder;
+use Database\Seeders\FleetSeeder;
+use Database\Seeders\UnitSeeder;
+use Database\Seeders\ServiceSeeder;
+use Database\Seeders\RouteSeeder;
+use Database\Seeders\PromoSeeder;
+use Database\Seeders\MenuSeeder;
+use Database\Seeders\DriverSeeder;
+use Database\Seeders\VehicleSeeder;
+use Database\Seeders\BranchSeeder;
+
+class DatabaseSeeder extends Seeder
+{
+    /**
+     * Seed the application's database.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $this->call(
+            [
+                RoleSeeder::class,
+                UserSeeder::class,
+                MenuSeeder::class,
+                BranchSeeder::class,
+            ]
+        );
+    }
+}
