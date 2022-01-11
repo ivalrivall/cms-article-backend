@@ -1,8 +1,8 @@
-name: Papandayan Project Deployment
+name: CMS Project Deployment
 
 on:
   push:
-    branches: [ development ]
+    branches: [ main ]
 
 jobs:
   deploy:
@@ -16,13 +16,13 @@ jobs:
     - uses: actions/checkout@v2
       with:
         token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-    - name: Check 'cargo.ivalpha.com' service url
+    - name: Check 'cms.ivalpha.com' service url
       uses: jtalk/url-health-check-action@v1.2
       with:
-        url: https://cargo.ivalpha.com/public/
+        url: https://cms.ivalpha.com/public/
         max-attempts: 3
         retry-delay: 5s
-    - name: Deploy to 'cargo.ivalpha.com'
+    - name: Deploy to 'cms.ivalpha.com'
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST_IVALPHA }}
@@ -30,10 +30,10 @@ jobs:
         password: ${{ secrets.SSH_PASSWORD_IVALPHA }}
         port: ${{ secrets.PORT_IVALPHA }}
         script: |
-          cd cargo.ivalpha.com
-          git checkout development
+          cd cms.ivalpha.com
+          git checkout main
           git fetch
-          git pull origin development
+          git pull origin main
           composer install
           php artisan optimize:clear
           exit
