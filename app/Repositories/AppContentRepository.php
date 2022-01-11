@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Models\Banner;
 use App\Models\Article;
 use App\Models\TemplateNotification;
 use App\Models\Notification;
@@ -23,12 +22,9 @@ class AppContentRepository
     protected $notification;
     protected $user;
 
-    public function __construct(Banner $banner, Article $article, TemplateNotification $templateNotif, Notification $notification, User $user)
+    public function __construct(Article $article, User $user)
     {
-        $this->banner = $banner;
         $this->article = $article;
-        $this->templateNotif = $templateNotif;
-        $this->notification = $notification;
         $this->user = $user;
     }
 
@@ -60,7 +56,7 @@ class AppContentRepository
         $article = new $this->article;
         $article->url = $data['url'];
         $article->image = $data['image'];
-        $article->description = $data['description'];
+        $article->description = null;
         $article->title = $data['title'];
         $article->save();
         Cache::put('article:'.$article['id'], $article, env('CACHE_EXP'));

@@ -20,14 +20,14 @@ class UserService {
     protected $mailRepository;
 
     public function __construct(
-        UserRepository $userRepository,
-        AddressRepository $addressRepository,
-        MailRepository $mailRepository
+        UserRepository $userRepository
+        // AddressRepository $addressRepository,
+        // MailRepository $mailRepository
     )
     {
         $this->userRepository = $userRepository;
-        $this->addressRepository = $addressRepository;
-        $this->mailRepository = $mailRepository;
+        // $this->addressRepository = $addressRepository;
+        // $this->mailRepository = $mailRepository;
     }
 
     /**
@@ -150,77 +150,77 @@ class UserService {
      * @param array $data
      * @return String
      */
-    public function updateUserService($data)
-    {
-        $validator = Validator::make($data, [
-            'phone' => 'regex:/^0[0-9]{9,}$/',
-        ]);
+    // public function updateUserService($data)
+    // {
+    //     $validator = Validator::make($data, [
+    //         'phone' => 'regex:/^0[0-9]{9,}$/',
+    //     ]);
 
-        if ($validator->fails()) {
-            throw new InvalidArgumentException('Nomor Telepon harus berawalan 0 dan minimal 9 angka');
-        }
+    //     if ($validator->fails()) {
+    //         throw new InvalidArgumentException('Nomor Telepon harus berawalan 0 dan minimal 9 angka');
+    //     }
 
-        $validator = Validator::make($data, [
-            'name' => 'bail|required|max:255',
-            'username' => [
-                'bail',
-                'required',
-                'max:255',
-                'regex:/^[A-Za-z0-9_]+$/',
-                Rule::unique('users', 'username')->ignore($data['id'])
-            ],
-            'phone' => [
-                'bail',
-                'max:999999999999999',
-                'numeric',
-                Rule::unique('users', 'phone')->ignore($data['id'])
-            ],
-            'id' => 'bail|required',
-            'role' => 'bail|required|max:50',
-            'branch' => 'bail|required|max:255',
-            'province' => 'bail|required|max:255',
-            'city' => 'bail|required|max:255',
-            'district' => 'bail|required|max:255',
-            'village' => 'bail|required|max:255',
-            'street' => 'bail|required|max:255',
-            'postalCode' => 'bail|required|numeric|max:99999',
-        ]);
+    //     $validator = Validator::make($data, [
+    //         'name' => 'bail|required|max:255',
+    //         'username' => [
+    //             'bail',
+    //             'required',
+    //             'max:255',
+    //             'regex:/^[A-Za-z0-9_]+$/',
+    //             Rule::unique('users', 'username')->ignore($data['id'])
+    //         ],
+    //         'phone' => [
+    //             'bail',
+    //             'max:999999999999999',
+    //             'numeric',
+    //             Rule::unique('users', 'phone')->ignore($data['id'])
+    //         ],
+    //         'id' => 'bail|required',
+    //         'role' => 'bail|required|max:50',
+    //         'branch' => 'bail|required|max:255',
+    //         'province' => 'bail|required|max:255',
+    //         'city' => 'bail|required|max:255',
+    //         'district' => 'bail|required|max:255',
+    //         'village' => 'bail|required|max:255',
+    //         'street' => 'bail|required|max:255',
+    //         'postalCode' => 'bail|required|numeric|max:99999',
+    //     ]);
 
-        if ($validator->fails()) {
-            if ($validator->errors()->first() == 'Format username tidak valid.') {
-                throw new InvalidArgumentException($validator->errors()->first().' hanya boleh underscore, angka, dan huruf');
-            }
-            throw new InvalidArgumentException($validator->errors()->first());
-        }
+    //     if ($validator->fails()) {
+    //         if ($validator->errors()->first() == 'Format username tidak valid.') {
+    //             throw new InvalidArgumentException($validator->errors()->first().' hanya boleh underscore, angka, dan huruf');
+    //         }
+    //         throw new InvalidArgumentException($validator->errors()->first());
+    //     }
 
-        DB::beginTransaction();
+    //     DB::beginTransaction();
 
-        try {
-            $result = $this->userRepository->updateUserRepo($data);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::info($e->getMessage());
-            throw new InvalidArgumentException($e->getMessage());
-        }
+    //     try {
+    //         $result = $this->userRepository->updateUserRepo($data);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::info($e->getMessage());
+    //         throw new InvalidArgumentException($e->getMessage());
+    //     }
 
-        $address = [
-            'postal_code' => $data['postalCode']
-        ];
-        $address = array_merge($address, $data);
+    //     $address = [
+    //         'postal_code' => $data['postalCode']
+    //     ];
+    //     $address = array_merge($address, $data);
 
-        try {
-            $this->addressRepository->update($address, $data['id']);
-        } catch (Exception $e) {
-            DB::rollBack();
-            Log::info($e->getMessage());
-            throw new InvalidArgumentException('Gagal mengubah data user');
-        }
+    //     try {
+    //         $this->addressRepository->update($address, $data['id']);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         Log::info($e->getMessage());
+    //         throw new InvalidArgumentException('Gagal mengubah data user');
+    //     }
 
-        DB::commit();
+    //     DB::commit();
 
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
     /**
      * Validate user data.

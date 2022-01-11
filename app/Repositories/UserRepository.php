@@ -4,8 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Pickup;
-use App\Models\Driver;
 
 use InvalidArgumentException;
 
@@ -25,12 +23,10 @@ class UserRepository
     protected $pickup;
     protected $driver;
 
-    public function __construct(Role $role, User $user, Pickup $pickup, Driver $driver)
+    public function __construct(Role $role, User $user)
     {
         $this->role = $role;
         $this->user = $user;
-        $this->pickup = $pickup;
-        $this->driver = $driver;
     }
 
     /**

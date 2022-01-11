@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Models\Role;
 use App\Models\User;
-use App\Models\Feature;
 use App\Models\Menu;
 use InvalidArgumentException;
 use Illuminate\Support\Str;
@@ -18,13 +17,11 @@ class RoleRepository
     public function __construct(
         Role $role,
         User $user,
-        Feature $feature,
         Menu $menu
     )
     {
         $this->role = $role;
         $this->user = $user;
-        $this->feature = $feature;
         $this->menu = $menu;
     }
 
@@ -215,15 +212,6 @@ class RoleRepository
         $role = $role->paginate($perPage);
 
         return $role;
-    }
-
-    /**
-     * Get list feature
-     */
-    public function featureListRepo()
-    {
-        $feature = $this->feature->select('name','id','slug')->get();
-        return $feature;
     }
 
     /**

@@ -65,34 +65,6 @@ return [
             'endpoint' => env('AWS_ENDPOINT'),
         ],
 
-        'storage_profile' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/upload/profile'),
-            'url' => env('APP_URL').'/storage/upload/profile',
-            'visibility' => 'public',
-        ],
-
-        'storage_route' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/upload/route'),
-            'url' => env('APP_URL').'/storage/upload/route',
-            'visibility' => 'public',
-        ],
-
-        'storage_tracking' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/upload/tracking'),
-            'url' => env('APP_URL').'/storage/upload/tracking',
-            'visibility' => 'public',
-        ],
-
-        'storage_banner' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public/upload/banner'),
-            'url' => env('APP_URL').'/storage/upload/banner',
-            'visibility' => 'public',
-        ],
-
         'storage_article' => [
             'driver' => 'local',
             'root' => storage_path('app/public/upload/article'),

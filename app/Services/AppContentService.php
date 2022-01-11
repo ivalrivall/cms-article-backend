@@ -421,7 +421,6 @@ class AppContentService {
     {
         $validator = Validator::make($data, [
             'title' => 'bail|required',
-            'description' => 'bail|required',
             'url' => 'bail|required',
             'image' => 'bail|required',
         ]);

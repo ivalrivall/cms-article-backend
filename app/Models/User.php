@@ -13,9 +13,7 @@ use Kyslik\ColumnSortable\Sortable;
 use OwenIt\Auditing\Contracts\Auditable;
 use OwenIt\Auditing\Auditable as Auditing;
 
-use App\Models\Feature;
 use App\Models\Role;
-use App\Models\Notification;
 
 class User extends Authenticatable implements MustVerifyEmail, Auditable
 {
@@ -196,10 +194,5 @@ class User extends Authenticatable implements MustVerifyEmail, Auditable
     public function changerExtraCosts()
     {
         return $this->hasMany(ExtraCost::class, 'updated_by');
-    }
-
-    public function notifications()
-    {
-        return $this->morphMany(Notification::class, 'notifiable');
     }
 }

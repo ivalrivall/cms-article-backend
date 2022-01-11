@@ -5,7 +5,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MenuController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AppContentController;
@@ -96,16 +95,8 @@ Route::middleware('guest')->group(function () {
         Route::post('forgot-password', [UserController::class, 'forgotPassword']);
     });
 
-    // Test
-    Route::post('test', [TestController::class, 'store']);
-    Route::get('test', [TestController::class, 'index']);
-
     Route::prefix('customer')->group(function() {
         Route::prefix('app-content')->group(function() {
-            Route::prefix('banner')->group(function() {
-                Route::get('all', [AppContentController::class, 'getAllDataBanner']);
-            });
-
             Route::prefix('article')->group(function() {
                 Route::post('paginate', [AppContentController::class, 'getDataArticlePaginate']);
             });
