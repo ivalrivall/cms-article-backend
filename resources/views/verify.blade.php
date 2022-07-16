@@ -22,7 +22,7 @@
         <div class="relative flex items-top justify-center min-h-screen bg-red-700 dark:bg-red-900 sm:items-center sm:pt-0">
             <div class="max-w-6xl mx-auto sm:px-6 lg:px-8">
                 <div class="flex justify-center pt-8 sm:justify-start sm:pt-0">
-                    <img src="{{ asset('images/logo-text.svg') }}" alt="image">
+                    <img src="{{ asset('images/allstar.jpeg') }}" alt="image">
                 </div>
 
                 <div class="mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg">
@@ -83,7 +83,7 @@
                     </div>
 
                     <div class="ml-4 text-center text-sm text-gray-100 sm:text-right sm:ml-0">
-                        Papandayan Cargo v1.0.0
+                        Allstar CMS v1.0.0
                     </div>
                 </div>
             </div>

@@ -147,7 +147,7 @@ class AuthService {
         try {
             $txt = str_replace('%otp%', $data['otp'], env('SMS_VIRO_OTP_TEXT'));
             $formData = [
-                'from' => 'PAPANDAYAN',
+                'from' => 'ALLSTAR',
                 'to' => $data['phone'],
                 'text' => $txt
             ];

@@ -24,7 +24,7 @@ return [
         'address'     => null,
 
         'logo'        => [
-            'path'   => '%PUBLIC%/images/logo-text.svg',
+            'path'   => '%PUBLIC%/images/allstar.jpeg',
             'width'  => '',
             'height' => '',
         ],

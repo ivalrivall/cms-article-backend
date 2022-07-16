@@ -81,7 +81,7 @@ Route::get('/test-email', function()
 	$beautymail->send('emails.verify-email', [], function($message)
 	{
 		$message
-			->from('ival@papandayan.com')
+			->from('ival@allstar.com')
 			->to('ivalrival95@gmail.com', 'Ival')
 			->subject('Welcome!');
 	});

@@ -26,7 +26,7 @@ class MailRepository
         $beautymail->send('emails.verify', ['user' => $user, 'verify' => $verifyUser], function($message) use ($user)
         {
             $message
-                // ->from('ival@papandayan.com')
+                // ->from('ival@allstar.com')
                 ->from(env('MAIL_FROM_ADDRESS'))
                 ->to($user->email, $user->name)
                 ->subject('Selamat bergabung!');
@@ -44,7 +44,7 @@ class MailRepository
         $beautymail->send('emails.forgotpass', ['user' => $user, 'newPass' => $newPass], function($message) use ($user)
         {
             $message
-                // ->from('ival@papandayan.com')
+                // ->from('ival@allstar.com')
                 ->from(env('MAIL_FROM_ADDRESS'))
                 ->to($user->email, $user->name)
                 ->subject('Password telah diubah!');
