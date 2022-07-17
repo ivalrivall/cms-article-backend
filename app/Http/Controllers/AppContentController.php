@@ -431,4 +431,26 @@ class AppContentController extends BaseController
 
         return $this->sendResponse(null, $result);
     }
+
+    /**
+     * get data category.
+     */
+    public function getDataCategoryPaginate(Request $request)
+    {
+        $data = $request->only([
+            'perPage',
+            'sort',
+            'page',
+            'name',
+            'slug'
+        ]);
+
+        try {
+            $result = $this->appContentService->getDataCategoryService($data);
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage());
+        }
+
+        return $this->sendResponse(null, $result);
+    }
 }

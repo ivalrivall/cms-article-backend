@@ -6,6 +6,7 @@ use App\Models\Article;
 use App\Models\TemplateNotification;
 use App\Models\Notification;
 use App\Models\User;
+use App\Models\Category;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
@@ -21,11 +22,13 @@ class AppContentRepository
     protected $templateNotif;
     protected $notification;
     protected $user;
+    protected $category;
 
-    public function __construct(Article $article, User $user)
+    public function __construct(Article $article, User $user, Category $category)
     {
         $this->article = $article;
         $this->user = $user;
+        $this->category = $category;
     }
 
     /**
@@ -382,7 +385,7 @@ class AppContentRepository
         $description = $data['description'];
         $url = $data['url'];
 
-        $article = $this->article;
+        $article = $this->article->with(['category']);
 
         if (empty($perPage)) {
             $perPage = 10;
@@ -596,5 +599,82 @@ class AppContentRepository
         $notification->read_at = Carbon::now('Asia/Jakarta')->toDateTimeString();
         $notification->save();
         return $notification;
+    }
+
+    /**
+     * get data category
+     *
+     * @param array $data
+     * @return Category
+     */
+    public function getDataCategoryRepo($data = [])
+    {
+        $perPage = $data['perPage'];
+        $page = $data['page'];
+        $sort = $data['sort'];
+
+        $name = $data['name'];
+        $slug = $data['slug'];
+
+        $cat = $this->category;
+
+        if (empty($perPage)) {
+            $perPage = 10;
+        }
+
+        if (!empty($sort['field'])) {
+            $order = $sort['order'];
+            if ($order == 'ascend') {
+                $order = 'asc';
+            } else if ($order == 'descend') {
+                $order = 'desc';
+            } else {
+                $order = 'desc';
+            }
+            switch ($sort['field']) {
+                case 'id':
+                    $cat = $cat->sortable([
+                        'id' => $order
+                    ]);
+                    break;
+                case 'name':
+                    $cat = $cat->sortable([
+                        'name' => $order
+                    ]);
+                    break;
+                case 'slug':
+                    $cat = $cat->sortable([
+                        'slug' => $order
+                    ]);
+                    break;
+                case 'created_at':
+                    $cat = $cat->sortable([
+                        'created_at' => $order
+                    ]);
+                    break;
+                case 'updated_at':
+                    $cat = $cat->sortable([
+                        'updated_at' => $order
+                    ]);
+                    break;
+                default:
+                    $cat = $cat->sortable([
+                        'id' => 'desc'
+                    ]);
+                    break;
+            }
+        }
+
+        if (!empty($name)) {
+            $cat = $cat->where('name', 'ilike', '%'.$name.'%');
+        }
+
+        if (!empty($slug)) {
+            $cat = $cat->where('slug', 'ilike', '%'.$slug.'%');
+        }
+
+        $result = $cat->paginate($perPage);
+
+        return $result;
     }
 }

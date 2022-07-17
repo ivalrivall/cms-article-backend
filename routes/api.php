@@ -82,6 +82,13 @@ Route::group(['middleware' => ['auth:api','auth.custom','cors.custom']], functio
                 Route::post('update', [AppContentController::class, 'editArticle']);
                 Route::post('delete', [AppContentController::class, 'deleteArticle']);
             });
+
+            Route::prefix('category')->group(function() {
+                Route::post('create', [AppContentController::class, 'createArticle']);
+                Route::post('paginate', [AppContentController::class, 'getDataCategoryPaginate']);
+                Route::post('update', [AppContentController::class, 'editArticle']);
+                Route::post('delete', [AppContentController::class, 'deleteArticle']);
+            });
         });
     });
 });

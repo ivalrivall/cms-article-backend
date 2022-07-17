@@ -4,17 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Database\Seeders\RoleSeeder;
-use Database\Seeders\FeatureSeeder;
 use Database\Seeders\UserSeeder;
-use Database\Seeders\FeatureRoleSeeder;
-use Database\Seeders\FleetSeeder;
-use Database\Seeders\UnitSeeder;
-use Database\Seeders\ServiceSeeder;
-use Database\Seeders\RouteSeeder;
-use Database\Seeders\PromoSeeder;
+use Database\Seeders\CategorySeeder;
+use Database\Seeders\ArticleSeeder;
 use Database\Seeders\MenuSeeder;
-use Database\Seeders\DriverSeeder;
-use Database\Seeders\VehicleSeeder;
 use Database\Seeders\BranchSeeder;
 
 class DatabaseSeeder extends Seeder
@@ -32,6 +25,8 @@ class DatabaseSeeder extends Seeder
                 UserSeeder::class,
                 MenuSeeder::class,
                 BranchSeeder::class,
+                CategorySeeder::class,
+                ArticleSeeder::class
             ]
         );
     }

@@ -581,4 +581,33 @@ class AppContentService {
         }
         return $result;
     }
+
+    /**
+     * get data article paginate
+     *
+     * @param array $data
+     */
+    public function getDataCategoryService($data)
+    {
+        $validator = Validator::make($data, [
+            'sort' => 'bail|present',
+            'perPage' => 'bail|present',
+            'page' => 'bail|present',
+            'name' => 'bail|present',
+            'slug' => 'bail|present'
+        ]);
+
+        if ($validator->fails()) {
+            throw new InvalidArgumentException($validator->errors()->first());
+        }
+
+        try {
+            $result = $this->appContentRepository->getDataCategoryRepo($data);
+        } catch (Exception $e) {
+            Log::info($e->getMessage());
+            Log::error($e);
+            throw new InvalidArgumentException('Gagal mendapatkan data category');
+        }
+        return $result;
+    }
 }
