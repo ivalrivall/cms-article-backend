@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Services\AppContentService;
 use App\Http\Controllers\BaseController;
 use Exception;
-use DB;
+use Illuminate\Support\Facades\DB;
 
 
 class AppContentController extends BaseController

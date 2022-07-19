@@ -451,7 +451,7 @@ class AppContentRepository
             $article = $article->where('url', 'ilike', '%'.$url.'%');
         }
 
-        $result = $article->paginate($perPage);
+        $result = $article->simplePaginate($perPage);
 
         return $result;
     }
